@@ -6,21 +6,30 @@ import (
     . "fmt"
     "runtime"
     "time"
+    "sync"
 )
 
-var i = 0
+var (
+    i = 0
+    lock sync.Mutex
+
+)
 
 func incrementing() {
     //TODO: increment i 1000000 times
     for j := 0; j < 1000000; j++ {
+        lock.Lock()
         i++
+        lock.Unlock()
     }
 }
 
 func decrementing() {
     //TODO: decrement i 1000000 times
-    for j := 0; j < 1000000; j++ {
+    for j := 0; j < 1000001; j++ {
+        lock.Lock()
         i--
+        lock.Unlock()
     }
 }
 
