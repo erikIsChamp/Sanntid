@@ -23,17 +23,26 @@ void* incrementingThreadFunction(void *arg){
     for (int j = 0; j <= 1000000; j++){
         i++;
     }
+
+    // Unlock the mutex to release the resource
+    pthread_mutex_unlock(&mutex);
+
     return NULL;
 }
 
 void* decrementingThreadFunction(void *arg){
-    // Wait for the semaphore
-    sem_wait(&semaphore);
+
+    // Lock the mutex to gain exclusive access to the shared resource
+    pthread_mutex_lock(&mutex);
 
     // TODO: decrement i 1_000_000 times
-    for (int j = 0; j <= 999999; j++){
+    for (int j = 0; j <= 1000001; j++){
         i--;
     }
+
+    // Unlock the mutex to release the resource
+    pthread_mutex_unlock(&mutex);
+
     return NULL;
 }
 
@@ -44,12 +53,6 @@ int main(){
     // Hint: search the web! Maybe try "pthread_create example"?
 
     pthread_t thread1, thread2; // Variables to hold thread identifiers
-
-    // Initialize the semaphore with an initial value of 1
-    if (sem_init(&semaphore, 0, 1) != 0) {
-        perror("sem_init");
-        return 1;
-    }
 
     // Create the first thread
     if (pthread_create(&thread1, NULL, incrementingThreadFunction, NULL) != 0) {
@@ -78,8 +81,8 @@ int main(){
         return 1;
     }
 
-    // Destroy the semaphore
-    sem_destroy(&semaphore);
+    // Destroy the mutex (not necessary in this simple example)
+    pthread_mutex_destroy(&mutex);
 
     printf("Both threads have finished\n");
     
