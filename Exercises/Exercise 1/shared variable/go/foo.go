@@ -37,19 +37,21 @@ func main() {
     inc := make(chan int,1)
     dec := make(chan int,1)
     done := make(chan bool,2)
+    
+
 	
     // TODO: Spawn both functions as goroutines
     go incrementing(inc,done)
     go decrementing(dec,done)
     
-    for j := 0; j < 1; j++ {
+    
         select {   
         case <- inc:
         case <- dec:
         case <- done:
-    
+        case <- done:
         }
-    }
+    
 	
     // We have no direct way to wait for the completion of a goroutine (without additional synchronization of some sort)
     // We will do it properly with channels soon. For now: Sleep.

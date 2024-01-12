@@ -11,8 +11,8 @@
 struct BoundedBuffer {
     struct RingBuffer*  buf;
     pthread_mutex_t     mtx;
-    sem_t               numElements;
-    sem_t               capacity;
+    sem_t               numElements; //one semephore for number of elements in buffer
+    sem_t               capacity; // one semephore for capacity of buffer
     
     
 };
@@ -23,7 +23,7 @@ struct BoundedBuffer* buf_new(int size){
     
     pthread_mutex_init(&buf->mtx, NULL);
     // TODO: initialize semaphores
-    sem_init(&buf->capacity,      0, size);
+    sem_init(&buf->capacity,      0, size); // pointing to the semaphore
 	sem_init(&buf->numElements,   0, 0);
     
     return buf;    

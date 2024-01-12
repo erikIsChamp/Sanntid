@@ -6,21 +6,26 @@
 
 // global shared int i = 0
 volatile int i = 0;
+pthread_mutex_t lock;
 
 
 // Note the return type: void*
 void* incrementingThreadFunction(){
     // TODO: increment i 1_000_000 times
     for (int j = 0; j <= 1000000; j++){
-        i++;
+        pthread_mutex_lock(&lock);
+        ++i;
+        pthread_mutex_unlock(&lock);
     }
     return NULL;
 }
 
 void* decrementingThreadFunction(){
     // TODO: decrement i 1_000_000 times
-    for (int j = 0; j <= 1000000; j++){
-        i--;
+    for (int j = 0; j <= 1000001; j++){
+        pthread_mutex_lock(&lock);
+        --i;
+        pthread_mutex_unlock(&lock);
     }
     return NULL;
 }
@@ -32,37 +37,19 @@ int main(){
     // Hint: search the web! Maybe try "pthread_create example"?
 
     pthread_t thread1, thread2; // Variables to hold thread identifiers
+    pthread_mutex_init(&lock, NULL);
 
     // Create the first thread
-    if (pthread_create(&thread1, NULL, incrementingThreadFunction, NULL) != 0) {
-        perror("pthread_create");
-        return 1;
-    }
+    pthread_create(&thread1, NULL, incrementingThreadFunction, NULL);
+    pthread_create(&thread2, NULL, decrementingThreadFunction, NULL);
 
-    // Create the second thread
-    if (pthread_create(&thread2, NULL, decrementingThreadFunction, NULL) != 0) {
-        perror("pthread_create");
-        return 1;
-    }
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
 
-    // TODO:
-    // wait for the two threads to be done before printing the final result
-    // Hint: Use `pthread_join`   
+    pthread_mutex_destroy(&lock); // destroyes mutes object and frees resources
 
-        // Wait for both threads to finish
-    if (pthread_join(thread1, NULL) != 0) {
-        perror("pthread_join");
-        return 1;
-    }
-
-    if (pthread_join(thread2, NULL) != 0) {
-        perror("pthread_join");
-        return 1;
-    }
-
-    printf("Both threads have finished\n");
-    
-    
     printf("The magic number is: %d\n", i);
     return 0;
+
+    
 }
