@@ -1,62 +1,78 @@
-// Use `go run foo.go` to run your program
+
+// Use go run foo.go to run your program
 
 package main
 
 import (
-    . "fmt"
-    "runtime"
-    "time"
-    
+	"fmt"
+	"runtime"
+	"sync"
 )
 
-var i int = 0
+var (
+	i            = 0
+	incrementCh  = make(chan struct{})
+	decrementCh  = make(chan struct{})
+	getValueCh   = make(chan int)
+	workerFinish = make(chan struct{})
+)
 
-func incrementing(inc chan int, c chan bool) {
-    //TODO: increment i 1000000 times
-    for j := 0; j < 1000000; j++ {
-        
-        i++
-        inc <- i
-    
-    }
-    c <- true
+// NumberServer represents the server that manages the integer value.
+func NumberServer() {
+	for {
+		select {
+		case <-incrementCh:
+			i++
+		case <-decrementCh:
+			i--
+		case getValueCh <- i:
+			// Do nothing for "get" as the result will be read later
+		case <-workerFinish:
+			return
+		}
+	}
 }
 
-func decrementing(dec chan int, c chan bool) {
-    //TODO: decrement i 1000000 times
-    for j := 0; j < 1000001; j++ {
-        i--
-        dec <- i
-    }
-    c <- true
+func incrementing() {
+	for j := 0; j < 1000000; j++ {
+		incrementCh <- struct{}{}
+	}
+	workerFinish <- struct{}{}
+}
+
+func decrementing() {
+	for j := 0; j < 1000006; j++ {
+		decrementCh <- struct{}{}
+	}
+	workerFinish <- struct{}{}
 }
 
 func main() {
-    // What does GOMAXPROCS do? What happens if you set it to 1?
-    runtime.GOMAXPROCS(2)
-    inc := make(chan int,1)
-    dec := make(chan int,1)
-    done := make(chan bool,2)
-    
+	runtime.GOMAXPROCS(2)
 
-	
-    // TODO: Spawn both functions as goroutines
-    go incrementing(inc,done)
-    go decrementing(dec,done)
-    
-    
-        select {   
-        case <- inc:
-        case <- dec:
-        case <- done:
-        case <- done:
-        }
-    
-	
-    // We have no direct way to wait for the completion of a goroutine (without additional synchronization of some sort)
-    // We will do it properly with channels soon. For now: Sleep.
-    time.Sleep(500*time.Millisecond)
-    Println("The magic number is:", i)
+	go NumberServer()
+	go incrementing()
+	go decrementing()
+
+	// Wait for both workers to finish
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		<-workerFinish
+	}()
+
+	go func() {
+		defer wg.Done()
+		<-workerFinish
+	}()
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Get the final value from the NumberServer
+	finalValue := <-getValueCh
+
+	fmt.Println("The magic number is:", finalValue)
 }
-
-
