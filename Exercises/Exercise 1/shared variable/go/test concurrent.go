@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
+// incrementer increments a shared integer and signals completion.
 func incrementer(incrementCh chan int, doneCh chan bool, wg *sync.WaitGroup) {
 	defer wg.Done() // Decrement the WaitGroup counter when done
 	for j := 0; j < 1000000; j++ {
@@ -12,6 +14,7 @@ func incrementer(incrementCh chan int, doneCh chan bool, wg *sync.WaitGroup) {
 	}
 }
 
+// decrementer decrements a shared integer and signals completion.
 func decrementer(decrementCh chan int, doneCh chan bool, wg *sync.WaitGroup) {
 	defer wg.Done() // Decrement the WaitGroup counter when done
 	for j := 0; j < 1000000; j++ {
@@ -30,6 +33,10 @@ func main() {
 	// Add two goroutines to the WaitGroup
 	wg.Add(2)
 
+	// Start the timer
+	startTime := time.Now()
+
+	// Start the incrementer and decrementer goroutines
 	go incrementer(incrementCh, doneCh, &wg)
 	go decrementer(decrementCh, doneCh, &wg)
 
@@ -38,9 +45,9 @@ func main() {
 		for {
 			select {
 			case <-incrementCh:
-				sharedValue++
+				continue
 			case <-decrementCh:
-				sharedValue--
+				continue
 			}
 		}
 	}()
@@ -51,5 +58,11 @@ func main() {
 	// Close the doneCh to signal completion
 	close(doneCh)
 
+	// Stop the timer
+	endTime := time.Now()
+
+	// Calculate and print the runtime
+	runtime := endTime.Sub(startTime)
 	fmt.Println("The magic number is:", sharedValue)
+	fmt.Printf("Runtime: %v\n", runtime)
 }
