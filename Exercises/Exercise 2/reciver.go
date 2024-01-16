@@ -9,9 +9,9 @@ import (
 func main() {
     // Listen on UDP port 30000 on all available unicast and
     // anycast IP addresses of the local system.
-    addr, err := net.ResolveUDPAddr("udp", ":30000")
+    addr, err := net.ResolveUDPAddr("udp", ":20007")
     if err != nil {
-        fmt.Println(err)
+        fmt.Println("Feil ved server", err)
         return
     }
     conn, err := net.ListenUDP("udp", addr)
@@ -26,6 +26,8 @@ func main() {
     for {
         // Read from UDP connection.
         // This will block until client send data.
+		
+		
         n, fromWho, err := conn.ReadFromUDP(buffer)
         if err != nil {
             fmt.Println(err)

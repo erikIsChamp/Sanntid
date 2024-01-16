@@ -3,14 +3,15 @@ package main
 import (
     "fmt"
     "net"
-    "time"
+    
 )
 
 func main() {
     // The address of the server you want to send to
     serverIP := "10.100.23.129"
-    port := "20007"
-    serverAddr := serverIP + ":" + port
+    workspaceNumber := 7 // replace with your workspace number
+    port := 20000 + workspaceNumber
+    serverAddr := fmt.Sprintf("%s:%d", serverIP, port)
 
     // The message you want to send
     message := []byte("Hello, Server!")
@@ -39,19 +40,6 @@ func main() {
 
     fmt.Println("Message sent!")
 
-    // Buffer to store the server's response
-    buffer := make([]byte, 1024)
+	
 
-    // Read the server's response
-    n, _, err := conn.ReadFromUDP(buffer)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-
-    // Print the server's response
-    fmt.Println("Received: ", string(buffer[:n]))
-
-    // Sleep for a while before sending the next message
-    time.Sleep(2 * time.Second)
 }
