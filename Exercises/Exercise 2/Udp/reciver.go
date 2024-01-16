@@ -9,7 +9,7 @@ import (
 func main() {
     // Listen on UDP port 30000 on all available unicast and
     // anycast IP addresses of the local system.
-    addr, err := net.ResolveUDPAddr("udp", ":20007")
+    addr, err := net.ResolveUDPAddr("udp", ":30000")
     if err != nil {
         fmt.Println("Feil ved server", err)
         return
@@ -33,6 +33,7 @@ func main() {
             fmt.Println(err)
             return
         }
+        fmt.Println(n)
 
         // Print the IP address of the sender
         fmt.Println("Received ", string(buffer[:n]), " from ", fromWho.IP)

@@ -14,14 +14,16 @@ func main() {
     serverAddr := fmt.Sprintf("%s:%d", serverIP, port)
 
     // The message you want to send
-    message := []byte("Hello, Server!")
+    message := "Hello, der!"
+    message_encoded := []byte(message)
 
     // Resolve the server address
     addr, err := net.ResolveUDPAddr("udp", serverAddr)
     if err != nil {
-        fmt.Println(err)
+       fmt.Println(err)
         return
     }
+  
 
     // Create a UDP connection
     conn, err := net.DialUDP("udp", nil, addr)
@@ -32,14 +34,13 @@ func main() {
     defer conn.Close()
 
     // Send the message
-    _, err = conn.Write(message)
+    _, err = conn.Write(message_encoded)
     if err != nil {
         fmt.Println(err)
         return
     }
 
-    fmt.Println("Message sent!")
+    fmt.Println("Message sent:", message)
 
-	
 
 }
