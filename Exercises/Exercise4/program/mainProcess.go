@@ -27,7 +27,7 @@ func backmyshiup() {
 	defer conn.Close()
 
 	for {
-		conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+		conn.SetReadDeadline(time.Now().Add(4 * time.Second))
 		_, _, err := conn.ReadFromUDP(buffer)
 		i := buffer[0]
 		if err != nil {
